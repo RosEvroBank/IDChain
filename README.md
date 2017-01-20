@@ -63,7 +63,7 @@ npm install
 
 Разработка
 
-![Image](https://raw.githubusercontent.com/RosEvroBank/Identify/master/doc/images/ID_arch_v.0.2-20.01.17.png)
+![Image](https://raw.githubusercontent.com/RosEvroBank/Identify/master/doc/images/Identify.png)
 
 
 
