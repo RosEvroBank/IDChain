@@ -1,0 +1,71 @@
+<br />
+<form>
+  <div class="form-group">
+    <label for="name">Fist name</label>
+    <input type="text" class="form-control" id="name" placeholder="First name" ng-model="firstname" ng-change="calcHash1()">
+    <!--
+	<br>
+    <input type="text" class="form-control" id="hash1" placeholder="hash1" ng-model="hash1">
+	-->
+  </div>
+  <br>
+  <div class="form-group">
+    <label for="lastname">Last name</label>
+    <input type="text" class="form-control" id="lastname" placeholder="Last name" ng-model="lastname" ng-change="calcHash2()">
+    <!--	
+	<br>
+    <input type="text" class="form-control" id="hash2" placeholder="hash2" ng-model="hash2">
+	-->
+ </div>
+ <br>
+ <div class="form-group">
+    <label for="bday">Birthday</label>
+    <input type="date" class="form-control" id="bday" placeholder="Birthday" ng-model="bday" ng-change="calcHash3()">
+    <!--
+	<br>
+    <input type="text" class="form-control" id="hash3" placeholder="hash3" ng-model="hash3">
+	-->
+ </div>
+ <br>
+ <div class="form-group">
+    <label for="token">Token</label>
+    <input type="text" class="form-control" id="token" placeholder="Token" ng-model="token">
+    <!--<input type="text" class="form-control" id="token" placeholder="Token" ng-model="token" ng-change="calcHash4()">
+    <br>
+    <button type="button" class="btn btn-primary" ng-click="calcHash4()" >Create Token</button>
+    <br>    
+    -->
+	<br>
+    <input type="text" class="form-control" id="hash4" placeholder="hash4" ng-model="hash4">	
+ </div>
+  <button type="button" class="btn btn-primary" style=margin: 0px auto; ng-click="add()" data-toggle="modal" data-target="#myModal" >Add</button>
+</form>
+<br />
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="myModalLabel">Результат запроса</h4>
+      </div>
+      <div class="modal-body" ng-if="!!add_result">
+        <span style="display: block; word-wrap: break-word;">Результат: {{add_result}}</span>
+      </div>
+      <div class="modal-body" ng-if="!!add_error">
+        <span style="display:block; word-wrap: break-word;">Ошибка: {{add_error}}</span>
+      </div>
+      
+      <div class="modal-body" ng-if="!add_result && !add_error">
+        <i class="fa fa-cog fa-spin fa-1x fa-fw"></i>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-cog fa-spin fa-fw" ng-if="!result && !error"></i>&nbsp;Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,14 @@
+<div class="row">
+    <h2>Files</h2>
+</div>    
+<input type="text" ng-model="filter" />
+<div  ng-init="listInit()" ng-repeat="item in list">
+    
+    <table class="table">
+        <tr ng-model="list" ng-repeat="it in item | filter" >
+            <td>{{$index}}</td>
+            <td>{{item}}</td>
+        </tr>
+    </table>    
+</div>
+
