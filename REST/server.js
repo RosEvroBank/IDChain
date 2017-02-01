@@ -29,7 +29,19 @@ app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({ extended: true }));
 app.use(require('express-session')({ secret: 'RosEuroBank developers the best!', resave: true, saveUninitialized: true }));
 
-app.get('/eth/address',  
+app.get('/eth/waitTx/:txHash',
+  function(req, res){
+
+    contract.waitTx(req.params.txHash)
+    .then(function(result){
+      res.status(200).json({result:result, error: null});
+    })
+    .catch(function(error){
+      res.status(500).json({result: null, error: error.message});
+    });
+});
+
+app.get('/eth/get/address',  
   function(req, res){
     contract.address()
     .then(function(result){
@@ -40,7 +52,7 @@ app.get('/eth/address',
     });    
 });
 
-app.get('/eth/AddRights/:address&:perm',
+app.get('/eth/AddRights/address=:address&permissions=:perm',
   function(req, res){
     contract.AddRights(req.params.address, req.params.perm)
     .then(function(result){
@@ -51,7 +63,7 @@ app.get('/eth/AddRights/:address&:perm',
     });    
 });
 
-app.get('/eth/GiveTokenPerm/:address&:token',
+app.get('/eth/GiveTokenPerm/address=:address&token=:token',
   function(req, res){
     contract.GiveTokenPerm(req.params.address, req.params.token)
     .then(function(result){
@@ -62,7 +74,7 @@ app.get('/eth/GiveTokenPerm/:address&:token',
     }); 
   });
 
-app.get('/eth/PartiesList/:hash',
+app.get('/eth/PartiesList/hash=:hash',
   function(req, res){
     contract.PartiesList(req.params.hash)
     .then(function(result){
@@ -73,7 +85,7 @@ app.get('/eth/PartiesList/:hash',
     }); 
   });
 
-app.get('/eth/AddHash/:hash&:token',
+app.get('/eth/AddHash/hash=:hash&token=:token',
   function(req, res){
     contract.AddHash(req.params.hash, req.params.token)
     .then(function(result){
@@ -84,7 +96,7 @@ app.get('/eth/AddHash/:hash&:token',
     }); 
   });
 
-app.get('/eth/RequestC/:hash&:token',
+app.get('/eth/RequestC/hash=:hash&token=:token',
   function(req, res){
     contract.RequestC(req.params.hash, req.params.token)
     .then(function(result){
@@ -95,7 +107,7 @@ app.get('/eth/RequestC/:hash&:token',
     }); 
   });
 
-app.get('/eth/Request/:hash&:token',
+app.get('/eth/Request/hash=:hash&token=:token',
   function(req, res){
     contract.Request(req.params.hash, req.params.token)
     .then(function(result){
@@ -106,7 +118,7 @@ app.get('/eth/Request/:hash&:token',
     }); 
   });
 
-app.get('/eth/RequestPC/:hash&:token',
+app.get('/eth/RequestPC/hash=:hash&token=:token',
   function(req, res){
     contract.RequestPC(req.params.hash, req.params.token)
     .then(function(result){

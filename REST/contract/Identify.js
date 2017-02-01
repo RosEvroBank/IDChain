@@ -130,7 +130,58 @@ var q = require('q');
              * 
              * @example common.debug('Debug message');
              */
-            debug: debug
+            debug: debug,
+            /**
+             * Function waits for entered a transaction in the block.
+             * 
+             * @param {string} Hash of a transaction
+             * 
+             * @param {function} A function of the smart-contract who fire sendTransaction and generate Hash of transaction
+             * 
+             * @example waitTx('0xe55a4b986459229fc57c0c718015915aa3336fc8c433d8b400f742e6fc269662', contract.AddHash)
+             *          .then(function(txObject){
+             *              console.log("%j", txObject)
+             *          })
+             *          .catch(function(error){
+             *              console.log("%j", error);
+             *          });
+             */
+            waitTx: function(txHash, contractFunction){                
+                debug(`Starting waitTx function for ${txHash}`);
+
+                var deferred = q.defer();
+                if (txHash == void 0){
+                    deferred.reject(new Error('txHash undefined.'));
+                }
+
+                var tx = web3.eth.getTransactionReceipt(txHash);
+                if(tx){
+                    if (tx.transactionHash == txHash){
+                        deferred.resolve(tx);
+                        debug(`tx already in block ${tx.blockNumber}`);
+                        return deferred.promise;
+                    }
+                }
+                
+                debug(`waiting tx: ${txHash}`);                  
+                var filter = web3.eth.filter('latest');
+                filter.watch(function(error, result) {
+                    debug(`a latest event fired`);
+                    var receipt = web3.eth.getTransactionReceipt(txHash);
+
+                    //checking receipt tx
+                    //TODO: Check if a transaction is correct (GAS LIMIT!)
+                    if (receipt && receipt.transactionHash == txHash) {
+                        debug(`receipt transaction in block ${receipt.blockNumber}`);
+                        deferred.resolve(receipt);
+                        //TODO: Do a return result of the function
+                        //var res = contractFunction.call();
+                        
+                        filter.stopWatching();
+                    }
+                });
+                return deferred.promise;
+            }
         }            
         
     })();
@@ -143,16 +194,14 @@ var q = require('q');
         common.debug(`Starting Identify module.`);
         return {
             /**
-             * User administration. Add user permissions.
-             * 
-             * @param {string} user ethereum address
-             * 
-             * @param {int} user permission.
-             * 
-             * @return {string} tx number.
-             * 
-             * @example var tx = Identify.AddRights( '0x4108f8299DCC126c56F0df02825F700e854b5b32', 1);
+             * Waiting transaction. See the common.waitTx
              */
+            waitTx: common.waitTx,
+            /**
+             * Returns smart-contract account (address).
+             * 
+             * @return {string} Smart-contract account address.  
+             */            
             address: function(){
                 var deferred = q.defer();
                 common.debug(`function=<address>`);
@@ -166,6 +215,23 @@ var q = require('q');
 
                 return deferred.promise;
             },
+            /**
+             * User administration. Add user permissions.
+             * 
+             * @param {string} user ethereum address
+             * 
+             * @param {int} user permission.
+             * 
+             * @return {string} tx number.
+             * 
+             * @example Identify.AddRights( '0x4108f8299DCC126c56F0df02825F700e854b5b32', 1)
+             *          .then(function(txHash){
+             *              console.log(txHash);
+             *          })
+             *          .catch(function(error){
+             *              console.log("%j", error);
+             *          });
+             */
             AddRights: function(address, perm){
                 var deferred = q.defer();
 
@@ -175,7 +241,9 @@ var q = require('q');
                         deferred.reject(new Error('Smart-contract not currently enabled.'));
                         return deferred.promise;
                     }
-
+                    //TODO: Include calling waitTx function for return only entered transactions.
+                    //When we fire smart-contract function using sendTransaction we receive a transaction
+                    //hash and us need to wait when transaction was enteren in then latest block of blockchain
                     common.contract.AddRights.sendTransaction(address, perm, function(err, res){
                         if(err){
                             common.debug(`AddRights result error: ${err}`);
@@ -197,7 +265,13 @@ var q = require('q');
              * 
              * @return {string} tx number.
              * 
-             * @example var tx = Identify.GiveTokenPerm( '0x4108f8299DCC126c56F0df02825F700e854b5b32', 'c3053184574070770f574018a6681e549f6b92a658528ad8f14d6a66c2f9a72ba99e64175d4cc920b8be66a66c2d66756f523c2b3cd6ee3534d0fd67b96c65cd');
+             * @example Identify.GiveTokenPerm( '0x4108f8299DCC126c56F0df02825F700e854b5b32', 'c3053184574070770f574018a6681e549f6b92a658528ad8f14d6a66c2f9a72ba99e64175d4cc920b8be66a66c2d66756f523c2b3cd6ee3534d0fd67b96c65cd')
+             *          .then(function(txHash){
+             *              console.log(txHash);
+             *          })
+             *          .catch(function(error){
+             *              console.log("%j", error);
+             *          });
              */            
             GiveTokenPerm: function(address, token){
                 var deferred = q.defer();
@@ -227,7 +301,13 @@ var q = require('q');
              * 
              * @return {string} tx number.
              * 
-             * @example var tx = Identify.PartiesList('c3053184574070770f574018a6681e549f6b92a658528ad8f14d6a66c2f9a72ba99e64175d4cc920b8be66a66c2d66756f523c2b3cd6ee3534d0fd67b96c65cd');
+             * @example Identify.PartiesList('c3053184574070770f574018a6681e549f6b92a658528ad8f14d6a66c2f9a72ba99e64175d4cc920b8be66a66c2d66756f523c2b3cd6ee3534d0fd67b96c65cd')
+             *          .then(function(result){
+             *              console.log("%j", result)
+             *          })
+             *          .catch(function(error){
+             *              console.log("%j", error)
+             *          });
              */
             PartiesList: function(hash){
                 var deferred = q.defer();
@@ -255,7 +335,13 @@ var q = require('q');
              * 
              * @return {string} tx number.
              * 
-             * @example var tx = Identify.AddHash('c3053184574070770f574018a6681e549f6b92a658528ad8f14d6a66c2f9a72ba99e64175d4cc920b8be66a66c2d66756f523c2b3cd6ee3534d0fd67b96c65cd', 'd44d94fcfa245c9c6cc5c53ccda79341ba8d44a1b6e5920021fbe0dd9dfcae666653e45d5780db90521fa0114ad41de35565f6e723de292a951004eceeb89e90');
+             * @example Identify.AddHash('c3053184574070770f574018a6681e549f6b92a658528ad8f14d6a66c2f9a72ba99e64175d4cc920b8be66a66c2d66756f523c2b3cd6ee3534d0fd67b96c65cd', 'd44d94fcfa245c9c6cc5c53ccda79341ba8d44a1b6e5920021fbe0dd9dfcae666653e45d5780db90521fa0114ad41de35565f6e723de292a951004eceeb89e90')
+             *          .then(function(txHash){
+             *              console.log(txHash);
+             *          })
+             *          .catch(function(error){
+             *              console.log("%j", error);
+             *          });
              */
             AddHash: function(hash, token){
                 var deferred = q.defer();
@@ -289,7 +375,13 @@ var q = require('q');
              * 
              * @return {string} tx number.
              * 
-             * @example var tx = Identify.RequestC('c3053184574070770f574018a6681e549f6b92a658528ad8f14d6a66c2f9a72ba99e64175d4cc920b8be66a66c2d66756f523c2b3cd6ee3534d0fd67b96c65cd', 'd44d94fcfa245c9c6cc5c53ccda79341ba8d44a1b6e5920021fbe0dd9dfcae666653e45d5780db90521fa0114ad41de35565f6e723de292a951004eceeb89e90');
+             * @example Identify.RequestC('c3053184574070770f574018a6681e549f6b92a658528ad8f14d6a66c2f9a72ba99e64175d4cc920b8be66a66c2d66756f523c2b3cd6ee3534d0fd67b96c65cd', 'd44d94fcfa245c9c6cc5c53ccda79341ba8d44a1b6e5920021fbe0dd9dfcae666653e45d5780db90521fa0114ad41de35565f6e723de292a951004eceeb89e90')
+             *          .then(function(result){
+             *              console.log("%j", result);
+             *          })
+             *          .catch(function(error){
+             *              console.log("%j", error);
+             *          });
              */
             RequestC: function(hash, token){
                 var deferred = q.defer();
@@ -317,7 +409,13 @@ var q = require('q');
              * 
              * @return {string} tx number.
              * 
-             * @example var tx = Identify.RequestPC('c3053184574070770f574018a6681e549f6b92a658528ad8f14d6a66c2f9a72ba99e64175d4cc920b8be66a66c2d66756f523c2b3cd6ee3534d0fd67b96c65cd', 'd44d94fcfa245c9c6cc5c53ccda79341ba8d44a1b6e5920021fbe0dd9dfcae666653e45d5780db90521fa0114ad41de35565f6e723de292a951004eceeb89e90');
+             * @example Identify.RequestPC('c3053184574070770f574018a6681e549f6b92a658528ad8f14d6a66c2f9a72ba99e64175d4cc920b8be66a66c2d66756f523c2b3cd6ee3534d0fd67b96c65cd', 'd44d94fcfa245c9c6cc5c53ccda79341ba8d44a1b6e5920021fbe0dd9dfcae666653e45d5780db90521fa0114ad41de35565f6e723de292a951004eceeb89e90');
+             *          .then(function(result){
+             *              console.log("%j", result);
+             *          })
+             *          .catch(function(error){
+             *              console.log("%j", error);
+             *          });
              */
             RequestPC: function(hash, token){
                 var deferred = q.defer();
@@ -345,7 +443,13 @@ var q = require('q');
              * 
              * @return {string} tx number.
              * 
-             * @example var tx = Identify.Request('c3053184574070770f574018a6681e549f6b92a658528ad8f14d6a66c2f9a72ba99e64175d4cc920b8be66a66c2d66756f523c2b3cd6ee3534d0fd67b96c65cd', 'd44d94fcfa245c9c6cc5c53ccda79341ba8d44a1b6e5920021fbe0dd9dfcae666653e45d5780db90521fa0114ad41de35565f6e723de292a951004eceeb89e90');
+             * @example Identify.Request('c3053184574070770f574018a6681e549f6b92a658528ad8f14d6a66c2f9a72ba99e64175d4cc920b8be66a66c2d66756f523c2b3cd6ee3534d0fd67b96c65cd', 'd44d94fcfa245c9c6cc5c53ccda79341ba8d44a1b6e5920021fbe0dd9dfcae666653e45d5780db90521fa0114ad41de35565f6e723de292a951004eceeb89e90');
+             *          .then(function(txHash){
+             *              console.log(txHash);
+             *          })
+             *          .catch(function(error){
+             *              console.log("%j", error);
+             *          });
              */
             Request: function(hash, token){
                 var deferred = q.defer();
