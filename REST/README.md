@@ -43,4 +43,4 @@ $npm install
 $node server.js
 ```
 
-Или в Microsoft Azure развертываем чете Azure Marketplace.
+Или в Microsoft Azure развертываем через Azure Marketplace.
