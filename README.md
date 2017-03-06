@@ -58,12 +58,3 @@ npm install
 Для удобства разработки на виртуальной машине сети Ethereum развернут [Solidity Browser](https://github.com/ethereum/browser-solidity) (инструмент для написания и отладки смарт-контрактов) и [Azure API Managment](https://docs.microsoft.com/en-gb/azure/api-management/api-management-get-started)(визуализация и тестирование REST API). На промышленном слое эти инструменты отсутствуют.
 
 
-Инфраструктура Azure
----
-
-Разработка
-
-![Image](https://raw.githubusercontent.com/RosEvroBank/Identify/master/doc/images/Identify.png)
-
-
-
