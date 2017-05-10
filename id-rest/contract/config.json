@@ -1,9 +1,0 @@
-{
-    "port":80,
-    "https_port":443,
-    "address": "0.0.0.0",
-    "enable_https":true,    
-    "debug": "id",
-    "id_contract_address": "0x7a9e97b1c4e040a9f146e9ec6bd49fe5c148dc83",
-    "gas": 1000000
-}
